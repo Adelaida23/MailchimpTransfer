@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MailchimptransferController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+
+
+Route::get('/mailchimp/transfer/index', [MailchimptransferController::class, 'index']);
+Route::post('/mailchimp/transfer', [MailchimptransferController::class, 'store'])->name('mailchimp.transfer');
