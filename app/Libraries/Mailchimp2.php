@@ -5,8 +5,6 @@ class Mailchimp
 
     private static $instance = null;
 
-
-
     private function __construct()
     {
         DB::table('esps_accounts')->where('email', $email)->first();
