@@ -16,5 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/mailchimp/transfer/index', [MailchimptransferController::class, 'index']);
+Route::get('/mailchimp/transfer/index', [MailchimptransferController::class, 'index'])->name('transfer');
 Route::post('/mailchimp/transfer', [MailchimptransferController::class, 'store'])->name('mailchimp.transfer');
+Route::get('/mailchimp/subscribe/index', [MailchimptransferController::class, 'indexSubscribe'])->name('index.subscribe');
+Route::post('mailchimp-subscribe', [MailchimptransferController::class, 'storeSubscribe'])->name('mailchimp.subscribe');

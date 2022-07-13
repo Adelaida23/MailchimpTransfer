@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\ClientException;
 class Mailchimp
 {
     protected $mailchimp;
+    //construct one
     public function __construct($config = [])
     {
         foreach ($config as $k => $v) {
@@ -16,6 +17,9 @@ class Mailchimp
         }
         $this->init();
     }
+
+    
+
     public function init()
     {
         $this->mailchimp = new \MailchimpMarketing\ApiClient();

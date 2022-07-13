@@ -14,12 +14,7 @@ class mailchimpTest extends TestCase
      *
      * @return void
      */
-    public function test_example()
-    {
-        $response = $this->get('/');
 
-        $response->assertStatus(200);
-    }
     public function test_mailchimp_transfer()
     {
         $this->withoutExceptionHandling();
@@ -108,10 +103,10 @@ class mailchimpTest extends TestCase
         $response = $mailchimp->getListMembersInformation("8100a4643a");
         print_r($response);
 
-        /*
+
         foreach ($response as $obj) {
             print_r($obj->email_address . " " . $obj->status . "\n");
-        }*/
+        }
     }
 
 
@@ -135,17 +130,68 @@ class mailchimpTest extends TestCase
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         //hash md5 or list member's email or contact_id
-        $response = $mailchimp->archivateListMember('8100a4643a', "inchurrumina@gmail.com"); 
+        $response = $mailchimp->archivateListMember('8100a4643a', "inchurrumina@gmail.com");
         print_r($response);
     }
-    public function test_delete_permanent(){
+    public function test_delete_permanent()
+    {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-        $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com"); 
+        $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com");
         print_r($response);
     }
 
     public function test_search_delete_insert_One_email()
-    { 
-        
+    {
     }
+
+    //view Subscribe
+    public function test_getViewSubscribe()
+    {
+        $this->withoutExceptionHandling();
+        $response = $this->get('/mailchimp/subscribe/index');
+        $response->assertStatus(200);
+        $response->assertViewIs('Mailchimp.subscribe');
+    }
+    public function test_route_subscribe()
+    {
+        $this->withoutExceptionHandling();
+        $response = $this->get('mailchimp-subscribe');
+        $response->assertOk();
+    }
+    public function test_get_key_server_account_esp()
+    {
+        //DB::table('esps_accounts')->where('email', $email)->first();
+       // $this->config_status =  Config::where("key", 'eostatus')->first();
+        //$this->config_key =  Config::where("key", 'eokey')->first();
+
+    }
+
+    public function test_ping_destinate()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => '5ab1dfc294b23187ec937bf029340efb-us12', 'server' => 'us12']);
+        $response = $mailchimp->ping();
+        print_r($response);
+    }
+    public function test_get_list_destinate()
+    { //otener datos list include list_id
+        $mailchimp = new Mailchimp(['apiKey' => '5ab1dfc294b23187ec937bf029340efb-us12', 'server' => 'us12']);
+        $response = $mailchimp->getLists();
+        print_r($response);  
+    }
+
+    public function test_addMemberList_destinate()
+    {
+        $client = new \MailchimpMarketing\ApiClient();
+        $client->setConfig([
+            'apiKey' => '5ab1dfc294b23187ec937bf029340efb-us12',
+            'server' => 'us12',
+        ]);
+
+        $response = $client->lists->addListMember('9097b7bd17', [
+            "email_address" => "babyflory23@gmail.com",
+            "status" => "subscribed",
+        ]);
+        print_r($response);
+    }
+    
 }

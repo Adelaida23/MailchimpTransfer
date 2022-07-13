@@ -19,7 +19,8 @@
                                 <label for="inputAddress" class="form-label ">Mailchimp account: origin </label>
                                 <select class="form-select" name="origin" aria-label="Default select example">
                                     <option value="" selected>Select one account</option>
-                                    <option value="adhel1997@gmail.com">adhel1997@gmail.com</option>
+                                    <option value="adelaida.molinar1997@gmail.com">ACOUNT ORIGIN</option>
+                                    
                                 </select>
                             </div>
                             @error('origin')
@@ -30,17 +31,22 @@
                                 <label for="inputAddress" class="form-label ">Mailchimp account: receives</label>
                                 <select class="form-select" name="receives" aria-label="Default select example">
                                     <option value="" selected>Select one account</option>
-                                    <option value="adelaida.molinar1997@gmail.com">adelaida.molinar1997@gmail.com</option>
+                                    <option value="adhel1997@gmail.com">ACCOUNT RECEIVES</option>
                                 </select>
                             </div>
                             @error('receives')
                             <div class="alert alert-danger">{{ $message }}</div>
                             @enderror
 
+                            <div class="col-4"> 
+                                <a href="{{route('index.subscribe')}}" class="btn btn-primary">Go to Subscribe</a>  
+                            </div>
+
+
                             <div class="">
                                 <label for="inputAddress" class="form-label ">Email's to transfer </label>
                                 <textarea name="emails" class="form-control border border-primary" cols="30" rows="10" value="{!! old('correos')??'' !!}" placeholder="Type emails">{!! old('correos')??"" !!}</textarea>
-                            </div> 
+                            </div>
                             @error('emails')
                             <div class="alert alert-danger">{{ $message }}</div>
                             @enderror
