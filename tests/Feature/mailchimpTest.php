@@ -84,7 +84,7 @@ class mailchimpTest extends TestCase
             'apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12',
             'server' => 'us12',
         ]);
-        $response = $client->list->getListMembersInfo("8100a4643a", ["name"]);
+        $response = $client->list->getListMembersInfo("8100a4643a");
         dd($response);
     }
     public function test_getListName()
@@ -102,11 +102,11 @@ class mailchimpTest extends TestCase
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->getListMembersInformation("8100a4643a");
         print_r($response);
-
-
+        /*
         foreach ($response as $obj) {
             print_r($obj->email_address . " " . $obj->status . "\n");
         }
+        */
     }
 
 
@@ -121,7 +121,7 @@ class mailchimpTest extends TestCase
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->addListOneMember('8100a4643a', [
-            "email_address" => "paolacastillo@gmail.com",
+            "email_address" => "czuly1989@gmail.com",
             "status" => "subscribed",
         ]);
         print_r($response);
@@ -130,7 +130,7 @@ class mailchimpTest extends TestCase
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         //hash md5 or list member's email or contact_id
-        $response = $mailchimp->archivateListMember('8100a4643a', "inchurrumina@gmail.com");
+        $response = $mailchimp->archivateListMember('8100a4643a', "babyflo@gmail.com");
         print_r($response);
     }
     public function test_delete_permanent()
@@ -138,6 +138,36 @@ class mailchimpTest extends TestCase
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com");
         print_r($response);
+    }
+
+    public function test_find_one_element_list_mailchimp()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $lista_elements = $mailchimp->getListMembersInformation("8100a4643a");
+        $correo = "hzhm1997@gmail.com"; //hsthenry3244@gmail.com,  //adhel1997@gmail.com
+        $indice = 0;
+        $object = null;
+        $limite = count($lista_elements);
+
+        while ($indice < $limite && $lista_elements[$indice]->email_address != $correo) {
+            print_r('entro');
+            $indice++;
+        }
+
+        if ($indice != $limite) {
+            //imprimir encontrado
+            $object = $lista_elements[$indice];
+            print_r($lista_elements[$indice]);
+        } else {
+            print_r('no encontrado');
+        }
+    }
+    public function test_search_on_mailchimp()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        // $lista_elements = $mailchimp->getListMembersInformation("8100a4643a");        
+        $objetoMailchimp = $mailchimp->getOneElement("hzhm1997@gmail.com", "8100a4643a");
+        print_r($objetoMailchimp);
     }
 
     public function test_search_delete_insert_One_email()
@@ -161,7 +191,7 @@ class mailchimpTest extends TestCase
     public function test_get_key_server_account_esp()
     {
         //DB::table('esps_accounts')->where('email', $email)->first();
-       // $this->config_status =  Config::where("key", 'eostatus')->first();
+        // $this->config_status =  Config::where("key", 'eostatus')->first();
         //$this->config_key =  Config::where("key", 'eokey')->first();
 
     }
@@ -176,7 +206,7 @@ class mailchimpTest extends TestCase
     { //otener datos list include list_id
         $mailchimp = new Mailchimp(['apiKey' => '5ab1dfc294b23187ec937bf029340efb-us12', 'server' => 'us12']);
         $response = $mailchimp->getLists();
-        print_r($response);  
+        print_r($response);
     }
 
     public function test_addMemberList_destinate()
@@ -193,5 +223,4 @@ class mailchimpTest extends TestCase
         ]);
         print_r($response);
     }
-    
 }
