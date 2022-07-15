@@ -14,7 +14,7 @@ class MailchimptransferController extends Controller
         return view('Mailchimp.Transfer.index');
     }
 
-    public function store(Request $request)
+    public function storeMailchimpToMailchimp(Request $request)
     {
         $request->validate(
             [
@@ -34,9 +34,6 @@ class MailchimptransferController extends Controller
         $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
         $listEmails   = explode("\n", $previus_emails);
 
-        //buscar
-
-        //eliminar
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         //hash md5 or list member's email or contact_id
         for ($i = 0; $i < count($listEmails); $i++) {
@@ -57,7 +54,6 @@ class MailchimptransferController extends Controller
 
     public function indexSubscribe()
     {
-
         return view('Mailchimp.subscribe');
     }
 
@@ -88,30 +84,24 @@ class MailchimptransferController extends Controller
         }
 
         return redirect()->back()->with(['success' => 'Subscribed successfull']);
-        // return redirect()->route('transfer');
     }
 
-    public function registerDestinate()
-    {
-    }
-
-    public function indexTransferMailToActive()
+    public function indexMailToActive()
     {
         return view('Mailchimp.Transfer.mailchimp_activetrail');
     }
-    public function storeTransferMailchimpToActivetrail(Request $request)
+    public function storeMailchimpToActivetrail(Request $request)
     {
         //  return true;
-
         $request->validate(
             [
                 'origin'  => 'required',
-                'receives' => 'required',
+                //'receives' => 'required',
                 'emails' => 'required',
             ],
             [
                 'origin.required'   => 'You need select origin account  ',
-                'receives.required'   => 'You need select destinate account  ',
+                //'receives.required'   => 'You need select destinate account  ',
                 'emails.required'   => 'You need add email to transfer',
             ]
         );
@@ -121,16 +111,36 @@ class MailchimptransferController extends Controller
         $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
         $listEmails   = explode("\n", $previus_emails);
 
+        if ($origin == 'mailchimp') {
 
-        // $listEmails = ['developper@gmail.com'];
+            $this->mailchimpToActivetrail($listEmails);
+
+            return redirect()->back()->with(['success' => 'Transfer successfull: Mailchimp to Active Trail']);
+        }
+
+        if ($origin == 'active_trail') {
+
+            $this->activeTrailToMailchimp($listEmails);
+
+            return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to Mailchimp']);
+        }
+
+        
+    }
+
+    public function mailchimpToActivetrail($listEmails)
+    {
         $list_id = '8100a4643a';
 
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-
+        $mailchimp = $this->initMailchimpOrigin();
+        /*
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
             'list_id' => '75188'
         ]);
+        */
+        $active_trail = $this->initActiveTrail();
 
         for ($i = 0; $i < count($listEmails); $i++) {
             //eliminar en mailchimp si encuentra
@@ -148,43 +158,28 @@ class MailchimptransferController extends Controller
             }
             */
             //insert with email
+            //$object_active_trail = $active_trail->getOneElement($listEmails[$i]);
+            //if (is_null($object_active_trail)) {
             $active_trail->insertElement($listEmails[$i]);
+            // }
         }
-        return redirect()->back()->with(['success' => 'Transfer successfull']);
     }
 
-    public function storeTransferActivetrailToMailchimp(Request $request)
+    public function activeTrailToMailchimp($listEmails)
     {
-        $request->validate(
-            [
-                'origin'  => 'required',
-                'destinate' => 'required',
-                'emails' => 'required',
-            ],
-            [
-                'origin.required'   => 'You need select origin account  ',
-                'destinate.required'   => 'You need select destinate account  ',
-                'emails.required'   => 'You need add email to transfer',
-            ]
-        );
-
-        $origin     = $request->origin;
-        $receives   = $request->receives;
-        $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
-        $listEmails   = explode("\n", $previus_emails);
-
-
-        // $listEmails = ['hsthenry3244@gmail.com', 'Hudziak100@yahoo.com'];
-        $list_id_origin = '8100a4643a';
+        $list_id = '8100a4643a';
         //$group_id = '75188';
 
+        /*
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
             'list_id' => '75188'
         ]);
+        */
+        $active_trail = $this->initActiveTrail();
 
-        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-
+        //$mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $mailchimp = $this->initMailchimpOrigin();
         for ($i = 0; $i < count($listEmails); $i++) {
             //buscar en activetrail
             $object_active_trail = $active_trail->getOneElement($listEmails[$i]);
@@ -194,21 +189,31 @@ class MailchimptransferController extends Controller
                 //eliminar activetrail
                 // print_r($object_active_trail['id']);
                 $active_trail->deleteMember($object_active_trail['id']); //'52069519' o 52063716
+                $active_trail->deleteContact($object_active_trail['id']);
             }
 
-            //insert mailchimp
-            $response = $mailchimp->addListOneMember($list_id_origin, [
+            //insert mailchimp if not exist
+            // $objetoMailchimp = $mailchimp->getOneElement($list_id, $listEmails[$i]);
+            // if (is_null($objetoMailchimp)) {
+            $mailchimp->addListOneMember($list_id, [
                 "email_address" => $listEmails[$i],
                 "status" => "subscribed",
             ]);
+            // }
         }
     }
-
-
 
     public function initMailchimpOrigin()
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         return $mailchimp;
+    }
+    public function initActiveTrail()
+    {
+        $active_trail = new ActiveTrail([
+            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
+            'list_id' => '75188'
+        ]);
+        return $active_trail;
     }
 }

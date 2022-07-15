@@ -73,7 +73,14 @@ class Mailchimp_activetrailTest extends TestCase
 
     public function test_transfer_activetrail_to_mailchimp_store()
     {
-        $listEmails = ['hsthenry3244@gmail.com', 'Hudziak100@yahoo.com'];
+        //$listEmails = ['hsthenry3244@gmail.com', 'Hudziak100@yahoo.com'];
+        /*$listEmails = ['Hudziak100@yahoo.com', 'hsthenry3244@gmail.com',
+                       'developper@gmail.com','czuly1989@gmail.com','cdautorio@gmail.com',
+                       'arturodelosangeles@hotmail.com'];
+                       */
+        $listEmails = ['Hudziak100@yahoo.com' , 'hsthenry3244@gmail.com',
+                       'developper@gmail.com'];
+                       
         $list_id_origin = '8100a4643a';
         //$group_id = '75188';
 

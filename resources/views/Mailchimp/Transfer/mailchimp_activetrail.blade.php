@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <section class="">
     <!--quit-->
     <div class="container ">
@@ -14,28 +15,32 @@
                     <div class="col-md-12 mx-auto text-center ">
                         <form action="{!!route('transfer.mailchimpToactivetrail')!!}" method="post" enctype="multipart/form-data" class="row g-3">
                             @csrf
-                            <div class="col-4">
-                                <label for="inputAddress" class="form-label ">Mailchimp account: origin </label>
-                                <select class="form-select" name="origin" aria-label="Default select example">
+                            <div class="col-3">
+                                <label for="inputAddress" class="form-label ">Account: origin </label>
+                                <select class="form-select" name="origin" id="origin_id" onclick="origin_destinate()" aria-label="Default select example">
                                     <option value="" selected>Select one account</option>
-                                    <option value="adelaida.molinar1997@gmail.com">ACOUNT ORIGIN MAILCHIMP</option>
-                                    
+                                    <option value="mailchimp">Mailchimp</option>
+                                    <option value="active_trail">Active Trail</option>
+                                </select>
+                            </div>
+                            <div class=" col-1"> To</div>
+
+                            <div class="col-3">
+                                <label for="inputAddress" class="form-label ">Account: Destinate</label>
+                                <select class="form-select" name="receives" id="destinate_id" aria-label="Default select example" disabled>
+                                    <option value="" selected>Select one account</option>
+                                    <option value="mailchimp">Mailchimp</option>
+                                    <option value="active_trail">Active Trail</option>
                                 </select>
                             </div>
                             @error('origin')
                             <div class="alert alert-danger">{{ $message }}</div>
                             @enderror
-
-                            <div class="col-4">
-                                <label for="inputAddress" class="form-label ">Mailchimp account: Destinate</label>
-                                <select class="form-select" name="receives" aria-label="Default select example">
-                                    <option value="" selected>Select one account</option>
-                                    <option value="adhel1997@gmail.com">ACCOUNT RECEIVES: ACTIVE TRAIL</option>
-                                </select>
-                            </div>
+                            <!--
                             @error('receives')
                             <div class="alert alert-danger">{{ $message }}</div>
                             @enderror
+                            -->
 
 
                             <div class="">
@@ -60,4 +65,20 @@
 
     </div>
 </section>
+
+@endSection
+
+@section('javascript')
+<script>
+    function origin_destinate() {
+        var origin = $("#origin_id").val();
+        if (origin == "mailchimp") {
+            $("#destinate_id").val("active_trail");
+        }
+        if (origin == "active_trail") {
+            $("#destinate_id").val("mailchimp");
+        }
+    }
+</script>
+
 @endSection

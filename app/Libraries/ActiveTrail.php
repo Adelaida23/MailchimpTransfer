@@ -127,11 +127,6 @@ class ActiveTrail
 		return $this->client->post('https://webapi.mymarketing.co.il/api/groups/' . $this->group . '/members', $data);
 	}
 
-	/*
-	public function delete(){
-		return $this->client->delete('http://webapi.mymarketing.co.il/api/groups/'. $this->group .'/members/{memberId}')
-	}
-	*/
 	public function getGroup($list_id)
 	{
 		return $this->client->get("https://webapi.mymarketing.co.il/api/groups/$list_id", []);
@@ -148,6 +143,10 @@ class ActiveTrail
 	public function deleteMember($contact_id)
 	{
 		return $this->client->delete("https://webapi.mymarketing.co.il/api/groups/" . $this->group . "/members/" . $contact_id, []);
+	}
+
+	public function deleteContact($contact_id){
+		return $this->client->delete("http://webapi.mymarketing.co.il/api/contacts/".$contact_id);
 	}
 
 	public function getOneElement($correo)
@@ -171,4 +170,6 @@ class ActiveTrail
 			return null;
 		}
 	}
+
+
 }

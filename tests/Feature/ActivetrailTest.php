@@ -74,7 +74,8 @@ class ActivetrailTest extends TestCase
         print_r($at_camps);
     }
 
-    public function test_get_one_element_mailchimp(){
+    public function test_get_one_element_mailchimp()
+    {
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
             'list_id' => '75188'
@@ -111,4 +112,14 @@ class ActivetrailTest extends TestCase
         }
     }
 
+    public function test_deleteContact()
+    {
+        $active_trail = new ActiveTrail([
+            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
+            'list_id' => '75188'
+        ]);
+        $response = $active_trail->deleteContact('52114510');
+        $elements = $response->json();
+        print_r($elements);
+    }
 }

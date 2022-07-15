@@ -17,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/mailchimp/transfer/index', [MailchimptransferController::class, 'index'])->name('transfer');
-Route::post('/mailchimp/transfer', [MailchimptransferController::class, 'store'])->name('mailchimp.transfer');
+Route::post('/mailchimp/transfer', [MailchimptransferController::class, 'storeMailchimpToMailchimp'])->name('mailchimp.transfer');
 Route::get('/mailchimp/subscribe/index', [MailchimptransferController::class, 'indexSubscribe'])->name('index.subscribe');
 Route::post('mailchimp-subscribe', [MailchimptransferController::class, 'storeSubscribe'])->name('mailchimp.subscribe');
 
 // transfer mailchimp active trail
-Route::get('transfer/index', [MailchimptransferController::class, 'indexTransferMailToActive'])->name('transfer.mailchimp_activetrail');
-Route::post('transfer/mailchimp/to/activetrail', [MailchimptransferController::class, 'storeTransferMailchimpToActivetrail'])->name('transfer.mailchimpToactivetrail');
+Route::get('transfer/index', [MailchimptransferController::class, 'indexMailToActive'])->name('transfer.mailchimp_activetrail');
+Route::post('transfer/mailchimp/to/activetrail', [MailchimptransferController::class, 'storeMailchimpToActivetrail'])->name('transfer.mailchimpToactivetrail');
