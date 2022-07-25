@@ -24,3 +24,4 @@ Route::post('mailchimp-subscribe', [MailchimptransferController::class, 'storeSu
 // transfer mailchimp active trail
 Route::get('transfer/index', [MailchimptransferController::class, 'indexMailToActive'])->name('transfer.mailchimp_activetrail');
 Route::post('transfer/mailchimp/to/activetrail', [MailchimptransferController::class, 'storeMailchimpToActivetrail'])->name('transfer.mailchimpToactivetrail');
+ 
