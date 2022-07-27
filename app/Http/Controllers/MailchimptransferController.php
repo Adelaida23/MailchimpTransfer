@@ -113,93 +113,65 @@ class MailchimptransferController extends Controller
 
         if ($origin == 'mailchimp') {
 
-            $this->mailchimpToActivetrail($listEmails);
+            $this->transferMailchimpToActivetrail($listEmails);
 
             return redirect()->back()->with(['success' => 'Transfer successfull: Mailchimp to Active Trail']);
         }
 
         if ($origin == 'active_trail') {
 
-            $this->activeTrailToMailchimp($listEmails);
+            $this->transferActiveTrailToMailchimp($listEmails);
 
             return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to Mailchimp']);
         }
-
-        
     }
 
-    public function mailchimpToActivetrail($listEmails)
+    public function transferMailchimpToActivetrail($listEmails)
     {
         $list_id = '8100a4643a';
 
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $mailchimp = $this->initMailchimpOrigin();
-        /*
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-        */
+
         $active_trail = $this->initActiveTrail();
 
         for ($i = 0; $i < count($listEmails); $i++) {
             //eliminar en mailchimp si encuentra
             //buscar en mailchimp
             $objetoMailchimp = $mailchimp->getOneElement($list_id, $listEmails[$i]);
+
+            $active_trail->insertElement($listEmails[$i]);
+            
             if (!is_null($objetoMailchimp)) {
                 $mailchimp->archivateListMember($list_id, $listEmails[$i]);
             }
-            //active trail: insert
-            /*insert with lead
-            $lead = Lead::where('email', '=', $listEmails[$i])->first();
-            if (!is_null($lead)) {
-                $response = $active_trail->push($lead);
-                $at_camps = $response->json();
-            }
-            */
-            //insert with email
-            //$object_active_trail = $active_trail->getOneElement($listEmails[$i]);
-            //if (is_null($object_active_trail)) {
-            $active_trail->insertElement($listEmails[$i]);
-            // }
+
+            
         }
     }
 
-    public function activeTrailToMailchimp($listEmails)
+    public function transferActiveTrailToMailchimp($listEmails)
     {
-        $list_id = '8100a4643a';
-        //$group_id = '75188';
+        $mail_list_id = '8100a4643a';
 
-        /*
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-        */
         $active_trail = $this->initActiveTrail();
 
-        //$mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $mailchimp = $this->initMailchimpOrigin();
         for ($i = 0; $i < count($listEmails); $i++) {
             //buscar en activetrail
             $object_active_trail = $active_trail->getOneElement($listEmails[$i]);
-            // print_r($object_active_trail); // 52110187
-
-            if (!is_null($object_active_trail)) {
-                //eliminar activetrail
-                // print_r($object_active_trail['id']);
-                $active_trail->deleteMember($object_active_trail['id']); //'52069519' o 52063716
-                $active_trail->deleteContact($object_active_trail['id']);
-            }
 
             //insert mailchimp if not exist
-            // $objetoMailchimp = $mailchimp->getOneElement($list_id, $listEmails[$i]);
-            // if (is_null($objetoMailchimp)) {
-            $mailchimp->addListOneMember($list_id, [
+            $mailchimp->addListOneMember($mail_list_id, [
                 "email_address" => $listEmails[$i],
                 "status" => "subscribed",
             ]);
-            // }
+
+            if (!is_null($object_active_trail)) {
+                //eliminar activetrail
+                $active_trail->deleteMember($object_active_trail['id']); //'52069519' o 52063716
+                $active_trail->deleteContact($object_active_trail['id']);
+            }
         }
     }
 

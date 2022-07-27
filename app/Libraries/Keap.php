@@ -69,6 +69,14 @@ class Keap
 		return $contact;
 	}
 
+	/*
+	public function deleteContact($lead){
+		$contact  = $this->client->contacts()->where('email', $lead->email)->first();
+		$response = $contact->deleteContact();
+		return $response;
+	}
+	*/
+
 	public function getMergeFields($list_id)
 	{
 		return false;
@@ -94,6 +102,20 @@ class Keap
 			'emailWithContent' => '<h1>Hello World</h1>',
 
 		]);
+	}
+
+	public function delete($lead)
+	{
+		$client   = \Illuminate\Support\Facades\Http::withToken($this->client->getToken()->accessToken);
+		if ($this->checkDuplicate($lead->email)) {
+			$contact = $this->client->contacts()->where('email', $lead->email)->first();
+			$contact_decod = json_decode($contact);
+			
+			$response = $client->delete("https://api.infusionsoft.com/crm/rest/v1/contacts/$contact_decod->id");
+			return $response;
+		} else {
+			return "Contact dont exist";
+		}
 	}
 
 	public function getCount($list_id)

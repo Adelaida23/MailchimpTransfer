@@ -69,7 +69,7 @@ class mailchimpTest extends TestCase
         $client->setConfig([
             'apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12',
             'server' => 'us12',
-        ]);
+        ]); 
 
         $response = $client->lists->addListMember('8100a4643a', [
             "email_address" => "babyflory23@gmail.com",

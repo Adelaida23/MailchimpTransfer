@@ -20,7 +20,6 @@ class ActivetrailTest extends TestCase
     public function test_active_trail_insert() //insert
     {
         $lead = Lead::find(6);
-
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
             'list_id' => '75188'
@@ -63,16 +62,7 @@ class ActivetrailTest extends TestCase
         print_r($at_camps);
     }
 
-    public function test_delete_element_group() //delete member
-    {
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-        $response = $active_trail->deleteMember('52069519'); //'52069519' o 52063716
-        $at_camps = $response->json();
-        print_r($at_camps);
-    }
+
 
     public function test_get_one_element_mailchimp()
     {
@@ -112,7 +102,7 @@ class ActivetrailTest extends TestCase
         }
     }
 
-    public function test_deleteContact()
+    public function test_deleteContact() //delete contanct and later  delete member 
     {
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
@@ -121,5 +111,15 @@ class ActivetrailTest extends TestCase
         $response = $active_trail->deleteContact('52114510');
         $elements = $response->json();
         print_r($elements);
+    }
+    public function test_delete_element_group() //delete member 
+    {
+        $active_trail = new ActiveTrail([
+            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
+            'list_id' => '75188'
+        ]);
+        $response = $active_trail->deleteMember('52069519'); //'52069519' o 52063716
+        $at_camps = $response->json();
+        print_r($at_camps);
     }
 }
