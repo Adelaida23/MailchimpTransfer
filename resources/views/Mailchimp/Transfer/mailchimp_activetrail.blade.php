@@ -9,7 +9,7 @@
         <div class="row ">
             <div class="card " style="border-style: solid;">
                 <div class="card-header mx-auto ">
-                    EMAIL TRANSFER MAILCHIMP TO ACTIVE TRAIL
+                    EMAIL TRANSFER 
                 </div>
                 <div class="card-body">
                     <div class="col-md-12 mx-auto text-center ">

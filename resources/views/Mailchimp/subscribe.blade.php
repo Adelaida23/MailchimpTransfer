@@ -19,7 +19,7 @@
                                 <label for="inputAddress" class="form-label ">Mailchimp account: origin </label>
                                 <select class="form-select" name="origin" aria-label="Default select example">
                                     <option value="" selected>Select one account</option>
-                                    <option value="adelaida.molinar1997@gmail.com">Account origin</option>
+                                    <option value="adelaida.molinar1997@gmail.com">Mailchimp</option>
                                 </select>
                             </div>
                             @error('origin')

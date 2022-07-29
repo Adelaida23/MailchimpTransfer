@@ -129,7 +129,7 @@ class KeapTest extends TestCase
             if (!is_null($lead)) {
                 $response = $keap->push($lead); //review
                 if (!empty($response['id'])) {
-                   // print_r($response->email_addresses[0]['email']);
+                    // print_r($response->email_addresses[0]['email']);
 
                     //insertar en table bd local
                     EspsRecords::create([
@@ -153,6 +153,46 @@ class KeapTest extends TestCase
         }
     }
 
+    public function test_transfer_Keap_to_ActiveTrail()
+    {
+        $listEmails = ['cdautorio@gmail.com'];
+        //conect api ACTIVE TRAIL 
+        //Search on active trail : if exist 
+        //conect api Keap
+        //insert on Keap : if response successfull :else dont delete nothing insert keap
+        //delete on active trail  
+        $active_trail = $this->initActiveTrail();
+        $keap = $this->initKeap();
+
+        for ($i = 0; $i < count($listEmails); $i++) {
+            //buscar en activetrail
+            $object_keap = EspsRecords::getActiveTrail('keap_id')->searchEmail($listEmails[$i])->first();
+
+            //insert on keap
+            $lead = Lead::searchLead($listEmails[$i]); //new method on lead
+            $response = $active_trail->insertElement($listEmails[$i]);
+            $at_campos = $response->json();
+            if (!empty($at_campos['id'])) {
+                EspsRecords::create([
+                    'email' => $at_campos['email'], // 
+                    'at_id' => $at_campos['id']
+                ]);
+
+                if (!is_null($object_keap) && !is_null($lead)) {
+                    //eliminar activetrail
+                    $keap->delete($lead);
+                    $object_keap->delete(); //si eliminar testeado
+                }
+                return true;
+            } else {
+                return false; //"no se agregó el contacto";
+            }
+
+            //recuperar respuesta push si fue exitoso
+            //insertar en la bd local y continue with delete en active trail
+        }
+    }
+
     public function initActiveTrail()
     {
         $active_trail = new ActiveTrail([
@@ -168,8 +208,8 @@ class KeapTest extends TestCase
             // 'esp_account_id' => '', //optional add
             'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
             'client_secret' => 'Tp60FxwTafCvAhpX',
-            'access_token'  => 'HXcQ5K2cAOkhjEcItal7bGTpjVEm',
-            'refresh_token' => '8KaZVc8nszn0zIS5WL3xf7B14tV5xAKx',
+            'access_token'  => 'TihjJXYwgvoaJXAkEm1clDoRqPvk',
+            'refresh_token' => 'Iwa5imAvxljhAIkMYnGAFrdYsGIDZjrn',
             'list_id'     => 92
         ]);
         return $infusionsoft;

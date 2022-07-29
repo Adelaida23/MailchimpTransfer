@@ -149,6 +149,15 @@ class MailchimptransferController extends Controller
                 return "error";
             }
         }
+
+        if ($origin == 'active_trail' && $receives == 'keap') {
+            $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
+            if ($response) {
+                return redirect()->back()->with(['success' => 'Transfer successfull: Keap to Active Trail']);
+            } else {
+                return "error";
+            }
+        }
     }
 
 
@@ -229,7 +238,6 @@ class MailchimptransferController extends Controller
 
     public function transferActiveTrailToKeap($listEmails)
     {
-
         //$listEmails = ['hsthenry3244@gmail.com'];
         //conect api ACTIVE TRAIL 
         //Search on active trail : if exist 
@@ -271,6 +279,46 @@ class MailchimptransferController extends Controller
                 //recuperar respuesta push si fue exitoso
                 //insertar en la bd local y continue with delete en active trail
             }
+        }
+    }
+
+    public function transfer_Keap_to_ActiveTrail($listEmails)
+    {
+        //$listEmails = ['cdautorio@gmail.com'];
+        //conect api ACTIVE TRAIL 
+        //Search on active trail : if exist 
+        //conect api Keap
+        //insert on Keap : if response successfull :else dont delete nothing insert keap
+        //delete on active trail  
+        $active_trail = $this->initActiveTrail();
+        $keap = $this->initKeap();
+
+        for ($i = 0; $i < count($listEmails); $i++) {
+            //buscar en activetrail
+            $object_keap = EspsRecords::getActiveTrail('keap_id')->searchEmail($listEmails[$i])->first();
+
+            //insert on keap
+            $lead = Lead::searchLead($listEmails[$i]); //new method on lead
+            $response = $active_trail->insertElement($listEmails[$i]);
+            $at_campos = $response->json();
+            if (!empty($at_campos['id'])) {
+                EspsRecords::create([
+                    'email' => $at_campos['email'], // 
+                    'at_id' => $at_campos['id']
+                ]);
+
+                if (!is_null($object_keap) && !is_null($lead)) {
+                    //eliminar activetrail
+                    $keap->delete($lead);
+                    $object_keap->delete(); //si eliminar testeado
+                }
+                return true;
+            } else {
+                return false; //"no se agregó el contacto";
+            }
+
+            //recuperar respuesta push si fue exitoso
+            //insertar en la bd local y continue with delete en active trail
         }
     }
 
