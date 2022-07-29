@@ -133,6 +133,7 @@ class MailchimptransferController extends Controller
         $listEmails   = explode("\n", $previus_emails);
 
         
+
         if ($origin == 'mailchimp' && $receives == 'active_trail') {
             $respuesta = $this->transferMailchimpToActivetrail($listEmails);
             if ($respuesta) {
@@ -140,34 +141,29 @@ class MailchimptransferController extends Controller
             } else {
                 return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
             }
-        }
-
-        if ($origin == 'active_trail' && $receives == 'mailchimp') {
-
+        } else if ($origin == 'active_trail' && $receives == 'mailchimp') {
             $response = $this->transferActiveTrailToMailchimp($listEmails);
             if ($response) {
                 return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to Mailchimp']);
             } else {
                 return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
             }
-        }
-
-        if ($origin == 'active_trail' && $receives == 'keap') {
+        } else if ($origin == 'active_trail' && $receives == 'keap') {
             $response = $this->transferActiveTrailToKeap($listEmails);
             if ($response) {
                 return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to  Keap']);
             } else {
                 return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
             }
-        }
-
-        if ($origin == 'active_trail' && $receives == 'keap') {
+        } else if ($origin == 'keap' && $receives == 'active_trail') {
             $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
             if ($response) {
                 return redirect()->back()->with(['success' => 'Transfer successfull: Keap to Active Trail']);
             } else {
                 return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
             }
+        } else {
+            return redirect()->back()->with(['error' => 'Transfer is not valide']);
         }
     }
 
@@ -370,8 +366,8 @@ class MailchimptransferController extends Controller
                 // 'esp_account_id' => '', //optional add
                 'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
                 'client_secret' => 'Tp60FxwTafCvAhpX',
-                'access_token'  => 'iiijgorOluAaDj3Y73LRCmkJ6f7t',
-                'refresh_token' => 'gWHOAEJOP9vbuCSLUyD6GRp3IzuiZ7YZ',
+                'access_token'  => 'CR2gVI00rNOVDp5uZbU4kAn1ajjL',
+                'refresh_token' => 'j0hwGa0goCXejInCn4W3440idTgPI5zK',
                 'list_id'     => 92
             ]);
             return $infusionsoft;
