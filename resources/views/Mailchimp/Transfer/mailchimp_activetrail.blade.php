@@ -21,16 +21,19 @@
                                     <option value="" selected>Select one account</option>
                                     <option value="mailchimp">Mailchimp</option>
                                     <option value="active_trail">Active Trail</option>
+                                    <option value="keap">Keap</option>
                                 </select>
                             </div>
                             <div class=" col-1"> To</div>
 
+
                             <div class="col-3">
                                 <label for="inputAddress" class="form-label ">Account: Destinate</label>
-                                <select class="form-select" name="receives" id="destinate_id" aria-label="Default select example" disabled>
+                                <select class="form-select" name="receives" id="destinate_id" aria-label="Default select example" >
                                     <option value="" selected>Select one account</option>
                                     <option value="mailchimp">Mailchimp</option>
                                     <option value="active_trail">Active Trail</option>
+                                    <option value="keap">Keap</option>
                                 </select>
                             </div>
                             @error('origin')
@@ -70,6 +73,7 @@
 
 @section('javascript')
 <script>
+    /*
     function origin_destinate() {
         var origin = $("#origin_id").val();
         if (origin == "mailchimp") {
@@ -79,6 +83,8 @@
             $("#destinate_id").val("mailchimp");
         }
     }
+    */
 </script>
+
 
 @endSection

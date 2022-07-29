@@ -35,7 +35,7 @@ class Lead extends Model
 	];
 
 	protected $casts = [
-	    'created_at' => 'datetime:Y-m-d H:i:s',
+		'created_at' => 'datetime:Y-m-d H:i:s',
 	];
 
 	protected $selectFields = [
@@ -49,44 +49,62 @@ class Lead extends Model
 		'domain' => 'Domain',
 	];
 
-	public function partner() {
-		return $this->belongsToMany(Partner::class,'leads_partners');
+	public function partner()
+	{
+		return $this->belongsToMany(Partner::class, 'leads_partners');
 	}
 
-	public function lists() {
+	public function lists()
+	{
 		return $this->hasMany(LeadList::class, 'lead_id', 'id');
 	}
 
-	public function hasPartner() {
+	public function hasPartner()
+	{
 		return count($this->partner);
 	}
 
-	public function selectFields() {
+	public function selectFields()
+	{
 		return $this->selectFields;
 	}
 
-	public static function boot() {
+	public static function boot()
+	{
 		parent::boot();
-		static::deleting(function($lead) {
+		static::deleting(function ($lead) {
 			$lead->partner()->delete();
 		});
 	}
 
-	public static function findFromHash($hash){
-	    return Lead::where("md5",$hash)->first() ?? null;
-    }
+	public static function findFromHash($hash)
+	{
+		return Lead::where("md5", $hash)->first() ?? null;
+	}
 
-	public static function allHashesLeads(){
+	public static function allHashesLeads()
+	{
 		$hashes = DB::table('leads')
 			->select('leads.md5', 'leads.email')
 			->get();
 		return $hashes;
 	}
 
-	public static function searchOneHash($hash_text){
+	public static function searchOneHash($hash_text)
+	{
 		$obj_suppression = Lead::where('md5', '=', $hash_text)->first();
-	   // if($obj_suppression != "")
+		// if($obj_suppression != "")
 		return $obj_suppression;
 	}
-	
+
+	//method ade 1 add for transfer
+	public static function searchLead($email)
+	{
+		$lead = Lead::where('email', $email)->first();
+
+		if (!empty($lead->id)) {
+			return $lead;
+		}
+		return null;
+	}
 }

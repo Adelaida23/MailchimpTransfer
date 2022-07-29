@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Libraries\Mailchimp;
+use App\Models\EspsRecords;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -69,7 +70,7 @@ class mailchimpTest extends TestCase
         $client->setConfig([
             'apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12',
             'server' => 'us12',
-        ]); 
+        ]);
 
         $response = $client->lists->addListMember('8100a4643a', [
             "email_address" => "babyflory23@gmail.com",
@@ -170,9 +171,7 @@ class mailchimpTest extends TestCase
         print_r($objetoMailchimp);
     }
 
-    public function test_search_delete_insert_One_email()
-    {
-    }
+
 
     //view Subscribe
     public function test_getViewSubscribe()
@@ -222,5 +221,28 @@ class mailchimpTest extends TestCase
             "status" => "subscribed",
         ]);
         print_r($response);
+    }
+
+    //pasado on controller
+    public function test_storeSubscribe_ultimo_ok() //test 28-07-22
+    {
+
+        $listEmails   = ['hsthenry3244@gmail.com'];
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        for ($i = 0; $i < count($listEmails); $i++) {
+            $response = $mailchimp->addListOneMember('8100a4643a', [
+                "email_address" => $listEmails[$i],
+                "status" => "subscribed",
+            ]);
+
+            if ($response != false &&  !empty($response->unique_email_id)) { //solo si manda true: ok //solo inserta una vez un email, la segunda vez manda false
+                //print_r($response->unique_email_id);
+                EspsRecords::create([
+                    'email' => $response->email_address, // 
+                    'mc_id' => $response->unique_email_id //se agrega solo para darle un valor a mailchimp. Para borrar se ocupa email
+                ]);
+                
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Libraries\ActiveTrail;
 use App\Libraries\Keap;
+use App\Models\EspsRecords;
 use App\Models\Lead;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -16,12 +17,14 @@ class KeapTest extends TestCase
      *
      * @return void
      */
+    /*
     public function test_example()
     {
         $response = $this->get('/');
 
         $response->assertStatus(200);
     }
+    */
 
     public function test_keap_ping()
     {
@@ -29,8 +32,8 @@ class KeapTest extends TestCase
             // 'esp_account_id' => '', //optional add
             'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
             'client_secret' => 'Tp60FxwTafCvAhpX',
-            'access_token'  => 'Gtgw3dODTuwXu3bHodYiYt9pZVSY',
-            'refresh_token' => 'VhSiiFsn6TzaQCRAZBHQE28Hfb4ulEXA',
+            'access_token'  => '8eiAc1ewn6FNxeH9kB0ztoAMyDDG',
+            'refresh_token' => 'joct87KhAygfaomqpN6GGoF8DCPtKHUJ',
         ]);
     }
 
@@ -40,13 +43,27 @@ class KeapTest extends TestCase
             // 'esp_account_id' => '', //optional add
             'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
             'client_secret' => 'Tp60FxwTafCvAhpX',
-            'access_token'  => 'OG8MBlYlUKgP7eycARk347KESFi9',
-            'refresh_token' => 'Ak2zW7v7vdeC40VG69ucedwKqXBSIxXs',
+            'access_token'  => 'gnq7WXpfX6Dr2nZLZo4GxPUnoAAY',
+            'refresh_token' => 'ikybvY6zcGbpmzoPlOkhmnKoPTYQpjPR',
             'list_id'     => 92
         ]);
-        $lead = Lead::find(1);
+        $lead = Lead::find(5);
         $response = $infusionsoft->push($lead);
-        print_r($response);
+        //print_r($response);
+        print_r($response['id']);
+
+        /*
+        $statusCode = $response->getStatusCode();
+        //echo $statusCode;die();
+        if ($statusCode != 200) {
+            print_r(null);
+        } else {
+            print_r($response);
+        }
+        */
+        //$content = json_decode($response->getBody(), true);
+        //return $content;
+
     }
     /* its ok
     public function test_insert_find_contact()
@@ -91,37 +108,47 @@ class KeapTest extends TestCase
 
     }
 
-    public function test_trasfer_activeTrail_keap()
+    public function test_transferActiveTrailToKeap()
     {
+        $listEmails = ['hsthenry3244@gmail.com'];
         //conect api ACTIVE TRAIL 
         //Search on active trail : if exist 
         //conect api Keap
         //insert on Keap : if response successfull :else dont delete nothing insert keap
         //delete on active trail  
-
-
-
-    }
-
-    public function transferActiveTrailToMailchimp($listEmails)
-    {
         $active_trail = $this->initActiveTrail();
-
         $keap = $this->initKeap();
 
         for ($i = 0; $i < count($listEmails); $i++) {
             //buscar en activetrail
-            $object_active_trail = $active_trail->getOneElement($listEmails[$i]);
+            $object_active_trail = EspsRecords::getActiveTrail('at_id')->searchEmail($listEmails[$i])->first();
 
             //insert on keap
-            $lead = Lead::find(1);
-            $keap->push($lead); //review
+            $lead = Lead::searchLead($listEmails[$i]); //new method on lead
 
+            if (!is_null($lead)) {
+                $response = $keap->push($lead); //review
+                if (!empty($response['id'])) {
+                   // print_r($response->email_addresses[0]['email']);
 
-            if (!is_null($object_active_trail)) {
-                //eliminar activetrail
-                $active_trail->deleteMember($object_active_trail['id']); //'52069519' o 52063716
-                $active_trail->deleteContact($object_active_trail['id']);
+                    //insertar en table bd local
+                    EspsRecords::create([
+                        'email'   => $response->email_addresses[0]['email'], // $response['email'], //??
+                        'keap_id' => $response['id']
+                    ]);
+
+                    if (!is_null($object_active_trail)) {
+                        //eliminar activetrail
+                        $active_trail->deleteMember($object_active_trail['at_id']); //'52069519' o 52063716
+                        $active_trail->deleteContact($object_active_trail['at_id']);
+                        $object_active_trail->delete(); //si eliminar testeado
+                    }
+                } else {
+                    "no se agregó el contacto";
+                }
+
+                //recuperar respuesta push si fue exitoso
+                //insertar en la bd local y continue with delete en active trail
             }
         }
     }
@@ -141,10 +168,26 @@ class KeapTest extends TestCase
             // 'esp_account_id' => '', //optional add
             'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
             'client_secret' => 'Tp60FxwTafCvAhpX',
-            'access_token'  => 'ywAwAEtf9VPfq7jKU8MIY6V5UFBZ',
-            'refresh_token' => 'CvTRO1GOBIsr4ZzMDm2RSwsGASsrSRbx',
-            // 'list_id'     => 92
+            'access_token'  => 'HXcQ5K2cAOkhjEcItal7bGTpjVEm',
+            'refresh_token' => '8KaZVc8nszn0zIS5WL3xf7B14tV5xAKx',
+            'list_id'     => 92
         ]);
         return $infusionsoft;
+    }
+
+    public function test_escopes_query()
+    {
+        //$users = EspsRecords::getActiveTrail('keap_id')->get(); ok
+        $users = EspsRecords::getActiveTrail('at_id')->searchEmail("zzzzzzz@gmail.com")->first();
+        print_r($users->at_id); //funciona
+        //print_r($users['at_id']); //funciona
+        //$object_active_trail->at_id
+    }
+
+
+    public function test_consulta()
+    {
+        $lead = Lead::find(5);
+        print_r($lead);
     }
 }
