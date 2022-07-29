@@ -6,6 +6,7 @@ use App\Libraries\ActiveTrail;
 use App\Libraries\Keap;
 use App\Models\EspsRecords;
 use App\Models\Lead;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -229,5 +230,22 @@ class KeapTest extends TestCase
     {
         $lead = Lead::find(5);
         print_r($lead);
+    }
+
+    public function test_ping_correct_token_validate()
+    {
+        try {
+            $infusionsoft = new Keap([
+                // 'esp_account_id' => '', //optional add
+                'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
+                'client_secret' => 'Tp60FxwTafCvAhpX',
+                'access_token'  => 'iiijgorOluAaDj3Y73LRCmkJ6f7t',
+                'refresh_token' => 'gWHOAEJOP9vbuCSLUyD6GRp3IzuiZ7YZ',
+                'list_id'     => 92
+            ]);
+            print_r($infusionsoft);
+        } catch (Exception $e) {
+            print_r("eorroro");
+        }
     }
 }

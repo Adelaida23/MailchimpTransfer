@@ -16,7 +16,7 @@ class mailchimpTest extends TestCase
      * @return void
      */
 
-    public function test_mailchimp_transfer()
+    public function test_mailchimp_transfer_go_view()
     {
         $this->withoutExceptionHandling();
         $response = $this->get('/mailchimp/transfer/index');
@@ -24,7 +24,7 @@ class mailchimpTest extends TestCase
         $response->assertViewIs('Mailchimp.Transfer.index');
     }
 
-    public function test_form()
+    public function test_form_ruta_post_mailchimp_transfer()
     {
         $this->withoutExceptionHandling();
         $response = $this->post(
@@ -40,7 +40,7 @@ class mailchimpTest extends TestCase
         //$response->assertSeeText('success');
     }
 
-    public function test_ping_mailchimp()
+    public function test_ping_mailchimp_with_apiclient()
     {
         $client = new \MailchimpMarketing\ApiClient();
         $client->setConfig([
@@ -51,13 +51,14 @@ class mailchimpTest extends TestCase
         print_r($response);
     }
 
-    public function test_ping()
+    public function test_ping_with_library()
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->ping();
         print_r($response);
     }
-    public function test_get_list()
+    //change name do descriptivo
+    public function test_get_list_emails_on_list()
     { //otener datos list include list_id
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->getLists();
@@ -241,8 +242,29 @@ class mailchimpTest extends TestCase
                     'email' => $response->email_address, // 
                     'mc_id' => $response->unique_email_id //se agrega solo para darle un valor a mailchimp. Para borrar se ocupa email
                 ]);
-                
             }
+        }
+    }
+
+    //success test ultimates
+
+    //test delete with validate response 
+    public function test_archivateOneEmail_validate_response()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        //hash md5 or list member's email or contact_id
+        $response = $mailchimp->archivateListMember('8100a4643a', "babyflo@gmail.com");
+        print_r($response);
+    }
+
+    public function test_ping_validate()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $response = $mailchimp->ping();
+        if (!empty($response->health_status)) {
+            print_r($response->health_status);
+        } else {
+            print_r("dont ping");
         }
     }
 }
