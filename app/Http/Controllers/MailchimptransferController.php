@@ -15,8 +15,19 @@ class MailchimptransferController extends Controller
     public function index()
     {
 
-        return view('Mailchimp.Transfer.index');
+        return view('mailchimp.transfer.index');
     }
+
+    public function indexSubscribe()
+    {
+        return view('Mailchimp.subscribe');
+    }
+
+    public function indexMailToActive()
+    {
+        return view('Mailchimp.Transfer.mailchimp_activetrail');
+    }
+
 
     public function storeMailchimpToMailchimp(Request $request)
     {
@@ -56,10 +67,7 @@ class MailchimptransferController extends Controller
     }
 
 
-    public function indexSubscribe()
-    {
-        return view('Mailchimp.subscribe');
-    }
+    
 
     public function storeSubscribe(Request $request)
     {
@@ -106,10 +114,7 @@ class MailchimptransferController extends Controller
         return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
     }
 
-    public function indexMailToActive()
-    {
-        return view('Mailchimp.Transfer.mailchimp_activetrail');
-    }
+    
     public function storeMailchimpToActivetrail(Request $request)
     {
         //  return true;
@@ -126,14 +131,33 @@ class MailchimptransferController extends Controller
             ]
         );
 
-
         $origin     = $request->origin;
         $receives   = $request->receives; //verify names on blade
         $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
         $listEmails   = explode("\n", $previus_emails);
 
-        
+        switch ($origin) {
+            case 'mailchimp' && $receives == 'active_trail':
+                $response = $this->transferMailchimpToActivetrail($listEmails);
+                $this->getResponse($response, " Mailchim to Active Trail");
+                break;
+            case 'active_trail' && $receives == 'mailchimp':
+                $response = $this->transferActiveTrailToMailchimp($listEmails);
+                $this->getResponse($response, " Active Trail to Mailchimp");
+                break;
+            case    'active_trail' && $receives == 'keap':
+                $response = $this->transferActiveTrailToKeap($listEmails);
+                $this->getResponse($response, "Active Trail to  Keap");
+                break;
+            case 'keap' && $receives == 'active_trail':
+                $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
+                $this->getResponse($response, "Keap to Active Trail");
+                break;
+            default:
+                return redirect()->back()->with(['error' => 'Transfer is not valide']);
+        }
 
+        /*
         if ($origin == 'mailchimp' && $receives == 'active_trail') {
             $respuesta = $this->transferMailchimpToActivetrail($listEmails);
             if ($respuesta) {
@@ -164,6 +188,16 @@ class MailchimptransferController extends Controller
             }
         } else {
             return redirect()->back()->with(['error' => 'Transfer is not valide']);
+        }
+
+        */
+    }
+    public function getResponse($response, $apis)
+    {
+        if ($response) {
+            return redirect()->back()->with(['success' => 'Transfer successfull: ' . $apis]);
+        } else {
+            return redirect()->back()->with(['error' => 'Has error on response. Dont transfer']);
         }
     }
 
@@ -366,8 +400,8 @@ class MailchimptransferController extends Controller
                 // 'esp_account_id' => '', //optional add
                 'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
                 'client_secret' => 'Tp60FxwTafCvAhpX',
-                'access_token'  => 'CR2gVI00rNOVDp5uZbU4kAn1ajjL',
-                'refresh_token' => 'j0hwGa0goCXejInCn4W3440idTgPI5zK',
+                'access_token'  => 'UshxFan21l6cSbn1ZWh9SnTQPwIo',
+                'refresh_token' => 'LjMbY6zfHhI0EteXK0fLnE3uPPCVX5Rv',
                 'list_id'     => 92
             ]);
             return $infusionsoft;
