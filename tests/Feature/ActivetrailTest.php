@@ -122,4 +122,12 @@ class ActivetrailTest extends TestCase
         $at_camps = $response->json();
         print_r($at_camps);
     }
+
+    public function test_insert_with_email_is_exist(){
+
+    }
+
+    public function test_delete_failed(){
+        
+    }
 }

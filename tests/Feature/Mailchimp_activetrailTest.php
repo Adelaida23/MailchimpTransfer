@@ -120,4 +120,5 @@ class Mailchimp_activetrailTest extends TestCase
             return "no recupera respuesta";
         }
     }
+    
 }

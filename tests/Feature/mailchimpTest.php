@@ -267,4 +267,12 @@ class mailchimpTest extends TestCase
             print_r("dont ping");
         }
     }
+
+    public function test_insert_with_email_is_exist(){
+
+    }
+
+    public function test_delete_failed(){
+        
+    }
 }

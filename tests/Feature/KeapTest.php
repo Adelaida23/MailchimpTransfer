@@ -245,7 +245,15 @@ class KeapTest extends TestCase
             ]);
             print_r($infusionsoft);
         } catch (Exception $e) {
-            print_r("eorroro");
+            return 0;
         }
+    }
+
+    public function test_insert_with_email_is_exist(){
+
+    }
+
+    public function test_delete_failed(){
+        
     }
 }

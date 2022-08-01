@@ -20,12 +20,12 @@ class MailchimptransferController extends Controller
 
     public function indexSubscribe()
     {
-        return view('Mailchimp.subscribe');
+        return view('mailchimp.subscribe');
     }
 
     public function indexMailToActive()
     {
-        return view('Mailchimp.Transfer.mailchimp_activetrail');
+        return view('mailchimp.transfer.mailchimp_activetrail');
     }
 
 
@@ -66,8 +66,6 @@ class MailchimptransferController extends Controller
         return redirect()->back()->with(['success' => 'Transfer success']);
     }
 
-
-    
 
     public function storeSubscribe(Request $request)
     {
@@ -114,7 +112,7 @@ class MailchimptransferController extends Controller
         return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
     }
 
-    
+
     public function storeMailchimpToActivetrail(Request $request)
     {
         //  return true;
@@ -136,25 +134,32 @@ class MailchimptransferController extends Controller
         $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
         $listEmails   = explode("\n", $previus_emails);
 
+        $apis = "";
         switch ($origin) {
             case 'mailchimp' && $receives == 'active_trail':
                 $response = $this->transferMailchimpToActivetrail($listEmails);
-                $this->getResponse($response, " Mailchim to Active Trail");
+                $apis = " Mailchim to Active Trail";
                 break;
             case 'active_trail' && $receives == 'mailchimp':
                 $response = $this->transferActiveTrailToMailchimp($listEmails);
-                $this->getResponse($response, " Active Trail to Mailchimp");
+                $apis = " Active Trail to Mailchimp";
                 break;
             case    'active_trail' && $receives == 'keap':
                 $response = $this->transferActiveTrailToKeap($listEmails);
-                $this->getResponse($response, "Active Trail to  Keap");
+                $apis = "Active Trail to  Keap";
                 break;
             case 'keap' && $receives == 'active_trail':
                 $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
-                $this->getResponse($response, "Keap to Active Trail");
+                $apis = "Keap to Active Trail";
                 break;
             default:
                 return redirect()->back()->with(['error' => 'Transfer is not valide']);
+                break;
+        }
+        if ($response) {
+            return redirect()->back()->with(['success' => 'Transfer successfull: ' . $apis]);
+        } else {
+            return redirect()->back()->with(['error' => 'Has error on response. Dont transfer']);
         }
 
         /*
@@ -192,20 +197,14 @@ class MailchimptransferController extends Controller
 
         */
     }
-    public function getResponse($response, $apis)
-    {
-        if ($response) {
-            return redirect()->back()->with(['success' => 'Transfer successfull: ' . $apis]);
-        } else {
-            return redirect()->back()->with(['error' => 'Has error on response. Dont transfer']);
-        }
-    }
+
 
 
     public function transferMailchimpToActivetrail($listEmails)
     {
         //$listEmails = ['cdautorio@gmail.com'];
         $list_id = '8100a4643a';
+        $bandera = false;
 
         //$mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $mailchimp = $this->initMailchimpOrigin();
@@ -232,19 +231,20 @@ class MailchimptransferController extends Controller
                         //$mailchimp->archivateListMember($list_id, $listEmails[$i]);
                         $mailchimp->archivateListMember($list_id, $object_active_trail->email);
                         $object_active_trail->delete();
+                        $bandera = true;
                     }
-                    return true;
-                }
-                return false; //"no recupera respuesta";
+                } else $bandera = false; //"no recupera respuesta";
+
             }
         }
-        return false; //no se hizo ping 
+        return $bandera;
     }
 
     public function transferActiveTrailToMailchimp($listEmails)
     {
         //        $listEmails = ['cdautorio@gmail.com'];
         $mail_list_id = '8100a4643a'; //do dinamic since db
+        $bandera = false;
 
         $active_trail = $this->initActiveTrail();
         $mailchimp    = $this->initMailchimpOrigin();
@@ -272,14 +272,14 @@ class MailchimptransferController extends Controller
                         $active_trail->deleteMember($object_active_trail['at_id']); //'52069519' o 52063716
                         $active_trail->deleteContact($object_active_trail['at_id']);
                         $object_active_trail->delete(); //si eliminar testeado
+                        $bandera = true;
                     }
-                    return true;
                 } else {
-                    return true; //ya existe un email o no se activo key on mailchimp
+                    $bandera = false; //ya existe un email o no se activo key on mailchimp
                 }
             }
         }
-        return false;
+        return $bandera;
     }
 
     public function transferActiveTrailToKeap($listEmails)
@@ -290,6 +290,7 @@ class MailchimptransferController extends Controller
         //conect api Keap
         //insert on Keap : if response successfull :else dont delete nothing insert keap
         //delete on active trail  
+        $bandera = false;
         $active_trail = $this->initActiveTrail();
         $keap = $this->initKeap();
 
@@ -317,10 +318,10 @@ class MailchimptransferController extends Controller
                             $active_trail->deleteMember($object_active_trail['at_id']); //'52069519' o 52063716
                             $active_trail->deleteContact($object_active_trail['at_id']);
                             $object_active_trail->delete(); //si eliminar testeado
+                            $bandera = true;
                         }
-                        return true;
                     } else {
-                        return false; //"no se agregó el contacto";
+                        $bandera = false; //"no se agregó el contacto";
                     }
 
                     //recuperar respuesta push si fue exitoso
@@ -328,7 +329,8 @@ class MailchimptransferController extends Controller
                 }
             }
         }
-        return false;
+        return $bandera;
+        // $this->getResponse($bandera, " Active Trail to Keap");
     }
 
     public function transfer_Keap_to_ActiveTrail($listEmails)
@@ -338,15 +340,14 @@ class MailchimptransferController extends Controller
         //Search on active trail : if exist 
         //conect api Keap
         //insert on Keap : if response successfull :else dont delete nothing insert keap
-        //delete on active trail  
+        //delete on active trail 
+        $bandera = false;
         $active_trail = $this->initActiveTrail();
         $keap = $this->initKeap();
-        if (!is_null($keap)) {
+        if (!empty($keap)) {
             for ($i = 0; $i < count($listEmails); $i++) {
                 //buscar en activetrail
                 $object_keap = EspsRecords::getActiveTrail('keap_id')->searchEmail($listEmails[$i])->first();
-
-                //insert on keap
                 $lead = Lead::searchLead($listEmails[$i]); //new method on lead
                 $response = $active_trail->insertElement($listEmails[$i]);
                 $at_campos = $response->json();
@@ -360,17 +361,17 @@ class MailchimptransferController extends Controller
                         //eliminar activetrail
                         $keap->delete($lead);
                         $object_keap->delete(); //si eliminar testeado
+                        $bandera = true;
                     }
-                    return true;
                 } else {
-                    return false; //"no se agregó el contacto";
+                    $bandera = false; //"no se agregó el contacto";
                 }
 
                 //recuperar respuesta push si fue exitoso
                 //insertar en la bd local y continue with delete en active trail
             }
         }
-        return false;
+        return $bandera;
     }
 
     public function initMailchimpOrigin()
