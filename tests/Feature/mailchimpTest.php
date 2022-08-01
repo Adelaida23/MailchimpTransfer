@@ -4,9 +4,13 @@ namespace Tests\Feature;
 
 use App\Libraries\Mailchimp;
 use App\Models\EspsRecords;
+use ErrorException;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+
+use function PHPUnit\Framework\returnSelf;
 
 class mailchimpTest extends TestCase
 {
@@ -164,12 +168,14 @@ class mailchimpTest extends TestCase
             print_r('no encontrado');
         }
     }
-    public function test_search_on_mailchimp()
+    public function search_on_mailchimp($list_id, $email)
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         // $lista_elements = $mailchimp->getListMembersInformation("8100a4643a");        
-        $objetoMailchimp = $mailchimp->getOneElement("hzhm1997@gmail.com", "8100a4643a");
-        print_r($objetoMailchimp);
+        $objetoMailchimp = $mailchimp->getOneElement("8100a4643a", "pat.chtensen@hcjpd.hctx.net");
+        if (is_object($objetoMailchimp))
+            print_r($objetoMailchimp);
+        else print_r("email no encontrado");
     }
 
 
@@ -267,12 +273,45 @@ class mailchimpTest extends TestCase
             print_r("dont ping");
         }
     }
-
-    public function test_insert_with_email_is_exist(){
-
+    public function test_verified_exist_email()
+    {
+        $list_id = '8100a4643a';
+        $email   = 'paolacastillo@gmail.com';
+        $this->search_on_mailchimp($list_id, $email);
+    }
+    //test delete and insert repit
+    public function test_insert_with_email_is_exist_mailchimp()
+    { //when is exist the response is empty
+        $listEmails = 'babyflory23@gmail.com';
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $response = $mailchimp->addListOneMember('8100a4643a', [
+            "email_address" => $listEmails,
+            "status"        => "subscribed",
+        ]);
+        if (is_object($response)) {
+            print_r("success");
+        } else print_r("failed");
     }
 
-    public function test_delete_failed(){
-        
+    //search_on_mailchimp($list_id, $email)
+
+
+    public function test_delete_failed_mailchimp()
+    { //siempre confirma delete
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        //hash md5 or list member's email or contact_id
+        //$response = $mailchimp->archivateListMember('8100a4643a', "santos@gmail.com");
+        //print_r($response);
+        $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com");
+        print_r($response);
+        //dd("response");
     }
+    /*
+    public function test_delete_permanent2()
+    {
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com");
+        print_r($response);
+    }
+    */
 }

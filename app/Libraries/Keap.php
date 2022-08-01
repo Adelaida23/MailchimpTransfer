@@ -110,7 +110,7 @@ class Keap
 		if ($this->checkDuplicate($lead->email)) {
 			$contact = $this->client->contacts()->where('email', $lead->email)->first();
 			$contact_decod = json_decode($contact);
-			
+
 			$response = $client->delete("https://api.infusionsoft.com/crm/rest/v1/contacts/$contact_decod->id");
 			return $response;
 		} else {
