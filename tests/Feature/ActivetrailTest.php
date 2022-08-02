@@ -17,18 +17,6 @@ class ActivetrailTest extends TestCase
      * @return void
      */
 
-    public function test_active_trail_insert() //insert
-    {
-        $lead = Lead::find(6);
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-
-        $response = $active_trail->push($lead);
-        $at_camps = $response->json();
-        print_r($at_camps);
-    }
 
     public function test_getGroupList() //information group
     {
@@ -51,7 +39,7 @@ class ActivetrailTest extends TestCase
         print_r($at_camps);
     }
 
-    public function test_get_one_member_group() //get information one member
+    public function test_verified_exist_email_id_at() //get information one member
     {
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
@@ -62,44 +50,20 @@ class ActivetrailTest extends TestCase
         print_r($at_camps);
     }
 
+    
+    
 
-
-    public function test_get_one_element_mailchimp()
+    public function test_active_trail_insert() //insert
     {
+        $lead = Lead::find(6);
         $active_trail = new ActiveTrail([
             'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
             'list_id' => '75188'
         ]);
-        $response = $active_trail->getOneElement('mcelrrroy.kathy@yahoo.com');
-        print_r($response);
-    }
 
-    public function test_get_contact_id()
-    {
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-        $response = $active_trail->getElementsGroup();
-        $elements = $response->json();
-
-        $correo = "adhel1997@gmail.com"; //hsthenry3244@gmail.com,  //adhel1997@gmail.com
-        $indice = 0;
-        $object = null;
-        $limite = count($elements);
-
-        while ($indice < $limite && $elements[$indice]['email'] != $correo) {
-            print_r('entro');
-            $indice++;
-        }
-
-        if ($indice != $limite) {
-            //imprimir encontrado
-            $object = $elements[$indice];
-            print_r($elements[$indice]);
-        } else {
-            print_r('no encontrado');
-        }
+        $response = $active_trail->push($lead);
+        $at_camps = $response->json();
+        print_r($at_camps);
     }
 
     public function test_deleteContact() //delete contanct and later  delete member 
@@ -150,5 +114,18 @@ class ActivetrailTest extends TestCase
         $response = $active_trail->deleteContact('53558350');
         $elements = $response->json();
         print_r($elements);
+    }
+
+    public function test_insert_prueba()
+    { //insert or update seconde time asigned id one and first time
+        $lead = Lead::find(37);
+        $active_trail = new ActiveTrail([
+            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
+            'list_id' => '75188'
+        ]);
+
+        $response = $active_trail->push($lead);
+        $at_camps = $response->json();
+        print_r($at_camps);
     }
 }

@@ -127,7 +127,7 @@ class mailchimpTest extends TestCase
     {
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->addListOneMember('8100a4643a', [
-            "email_address" => "czuly1989@gmail.com",
+            "email_address" => "paul@lanset.com",
             "status" => "subscribed",
         ]);
         print_r($response);
@@ -168,15 +168,7 @@ class mailchimpTest extends TestCase
             print_r('no encontrado');
         }
     }
-    public function search_on_mailchimp($list_id, $email)
-    {
-        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-        // $lista_elements = $mailchimp->getListMembersInformation("8100a4643a");        
-        $objetoMailchimp = $mailchimp->getOneElement("8100a4643a", "pat.chtensen@hcjpd.hctx.net");
-        if (is_object($objetoMailchimp))
-            print_r($objetoMailchimp);
-        else print_r("email no encontrado");
-    }
+
 
 
 
@@ -273,16 +265,11 @@ class mailchimpTest extends TestCase
             print_r("dont ping");
         }
     }
-    public function test_verified_exist_email()
-    {
-        $list_id = '8100a4643a';
-        $email   = 'paolacastillo@gmail.com';
-        $this->search_on_mailchimp($list_id, $email);
-    }
+    
     //test delete and insert repit
     public function test_insert_with_email_is_exist_mailchimp()
     { //when is exist the response is empty
-        $listEmails = 'babyflory23@gmail.com';
+        $listEmails = 'babyfloryzzz@gmail.com';
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
         $response = $mailchimp->addListOneMember('8100a4643a', [
             "email_address" => $listEmails,
@@ -293,7 +280,17 @@ class mailchimpTest extends TestCase
         } else print_r("failed");
     }
 
-    //search_on_mailchimp($list_id, $email)
+    public function test_insert_with_email_is_exist_mailchimp2()
+    { //when is exist the response is empty
+        $listEmails = 'babyflory@gmail.com';
+        $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
+        $response = $mailchimp->addListOneMember('8100a4643a', [
+            "email_address" => $listEmails,
+            "status"        => "subscribed",
+        ]);
+
+        print_r($response);
+    }
 
 
     public function test_delete_failed_mailchimp()
@@ -306,12 +303,14 @@ class mailchimpTest extends TestCase
         print_r($response);
         //dd("response");
     }
-    /*
-    public function test_delete_permanent2()
+
+    public function test_delete_method()
     {
+        $listEmails = 'pat.christensen@hcjpd.hctx.net';
+        $object_records_origin = EspsRecords::getActiveTrail('mc_id')->searchEmail($listEmails)->first();
         $mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-        $response = $mailchimp->deleteListMemberPermanent('8100a4643a', "paolacastillo@gmail.com");
+        $response = $mailchimp->delete($object_records_origin);
         print_r($response);
     }
-    */
+
 }

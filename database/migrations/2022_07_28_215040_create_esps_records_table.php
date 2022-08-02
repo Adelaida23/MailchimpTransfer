@@ -15,13 +15,11 @@ class CreateEspsRecordsTable extends Migration
     {
         Schema::create('esps_records', function (Blueprint $table) {
             $table->id();
-            //$table->integer('esp_id');
             $table->string('email');
-            //$table->integer('esp_id')->nullable(); //borrar ?
             $table->string('mc_id')->nullable();
             $table->string('at_id')->nullable();
             $table->string('keap_id')->nullable();
-            //$table->string('list_id'); //borrar?
+            $table->string('list_id'); //add
             $table->timestamps();
         });
     }

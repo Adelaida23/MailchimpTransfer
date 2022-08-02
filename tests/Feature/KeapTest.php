@@ -51,45 +51,9 @@ class KeapTest extends TestCase
         ]);
         $lead = Lead::find(5);
         $response = $infusionsoft->push($lead);
-        //print_r($response);
         print_r($response['id']);
-
-        /*
-        $statusCode = $response->getStatusCode();
-        //echo $statusCode;die();
-        if ($statusCode != 200) {
-            print_r(null);
-        } else {
-            print_r($response);
-        }
-        */
-        //$content = json_decode($response->getBody(), true);
-        //return $content;
-
     }
-    /* its ok
-    public function test_insert_find_contact()
-    {
-        $infusionsoft = new Keap([
-            // 'esp_account_id' => '', //optional add
-            'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
-            'client_secret' => 'Tp60FxwTafCvAhpX',
-            'access_token'  => 'oIoOTimlUHQMOdmpuupxIABJ6No2',
-            'refresh_token' => 'TYME56TgMLlP3F8fV5kTjoNyj7AFjedM',
-            'list_id'     => 92
-        ]);
-        $lead = Lead::find(22);
-        $response = $infusionsoft->push($lead);
-        //print_r($response);
 
-        //$lead = Lead::find(20);
-        $response = $infusionsoft->delete($lead);
-        print_r(" print_R, el contacto email es: ---- : " . $response);
-        dd("El response dd: ", $response);
-        //print_r($response);
-
-    }
-    */
 
     public function test_delete_contact()
     {
@@ -219,21 +183,16 @@ class KeapTest extends TestCase
 
     public function test_escopes_query()
     {
-        //$users = EspsRecords::getActiveTrail('keap_id')->get(); ok
         $users = EspsRecords::getActiveTrail('at_id')->searchEmail("zzzzzzz@gmail.com")->first();
         print_r($users->at_id); //funciona
-        //print_r($users['at_id']); //funciona
-        //$object_active_trail->at_id
     }
-
-
     public function test_consulta()
     {
         $lead = Lead::find(5);
         print_r($lead);
     }
 
-    public function test_ping_correct_token_validate()
+    public function test_ping_token_validate()
     {
         try {
             $infusionsoft = new Keap([
@@ -249,16 +208,8 @@ class KeapTest extends TestCase
             return 0;
         }
     }
-    public function test_refresh_token_do()
+    public function test_refresh_token_generate()
     {
-
-        /*
-        $espAccount =  $list->esp_account;
-        // ESP Data
-        $esp = $espAccount->esp;
-        $espAccount = ESPAccount::find($this->esp_account_id);
-        */
-
         $espAccount = ESPAccount::find(3);
         $esp_keap = new Keap([
             'apiKey' => $espAccount->key,
@@ -278,7 +229,7 @@ class KeapTest extends TestCase
     }
 
     //test insert and delete repit
-    public function test_insert_with_email_is_exist_keap()
+    public function test_insert_twice() //when is exist and duplicate
     { //insert or update second time
         $espAccount = ESPAccount::find(3);
         $infusionsoft = new Keap([
@@ -296,14 +247,13 @@ class KeapTest extends TestCase
             //'user_token' => $espAccount->user_token
         ]);
 
-
         $lead = Lead::find(5);
         $response = $infusionsoft->push($lead);
         print_r($response);
         print_r($response['id']);
     }
 
-    public function test_delete_failed_keap()
+    public function test_delete_failed_keap() //when is delete and duplicate
     { //manda error lo cacho desde el library keap para recibir 1 respuesta
         $espAccount = ESPAccount::find(3);
         $infusionsoft = new Keap([
@@ -325,7 +275,5 @@ class KeapTest extends TestCase
 
         $response = $infusionsoft->delete($lead);
         print_r($response);
-        // print_r(" print_R, el contacto email es: ---- : " . $response);
-        //dd($response);
     }
 }

@@ -104,11 +104,11 @@ class Keap
 		]);
 	}
 
-	public function delete($lead)
+	public function delete($esp_record)
 	{
 		$client   = \Illuminate\Support\Facades\Http::withToken($this->client->getToken()->accessToken);
-		if ($this->checkDuplicate($lead->email)) {
-			$contact = $this->client->contacts()->where('email', $lead->email)->first();
+		if ($this->checkDuplicate($esp_record->email)) {
+			$contact = $this->client->contacts()->where('email', $esp_record->email)->first();
 			$contact_decod = json_decode($contact);
 
 			$response = $client->delete("https://api.infusionsoft.com/crm/rest/v1/contacts/$contact_decod->id");

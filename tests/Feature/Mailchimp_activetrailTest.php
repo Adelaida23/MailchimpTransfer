@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Libraries\ActiveTrail;
 use App\Libraries\Mailchimp;
+use App\Models\ESP;
+use App\Models\ESPAccount;
 use App\Models\EspsRecords;
 use App\Models\Lead;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +19,7 @@ class Mailchimp_activetrailTest extends TestCase
      *
      * @return void
      */
-    
+
     public function test_transfer_mailchimp_activeTrail_index()
     {
         $this->withoutExceptionHandling();
@@ -120,5 +122,12 @@ class Mailchimp_activetrailTest extends TestCase
             return "no recupera respuesta";
         }
     }
-    
+
+   
+
+    /*
+    public function test_found_registerBD(){
+        EspsRecords::
+    }
+    */
 }

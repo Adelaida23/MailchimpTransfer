@@ -113,6 +113,7 @@ class ActiveTrail
 		return $group['counter'];
 	}
 
+	/*
 	//methods ade 
 	public function insertElement($email, $field = FALSE)
 	{
@@ -126,6 +127,7 @@ class ActiveTrail
 
 		return $this->client->post('https://webapi.mymarketing.co.il/api/groups/' . $this->group . '/members', $data);
 	}
+	*/
 
 	public function getGroup($list_id)
 	{
@@ -145,8 +147,15 @@ class ActiveTrail
 		return $this->client->delete("https://webapi.mymarketing.co.il/api/groups/" . $this->group . "/members/" . $contact_id, []);
 	}
 
-	public function deleteContact($contact_id){
-		return $this->client->delete("http://webapi.mymarketing.co.il/api/contacts/".$contact_id);
+	public function deleteContact($contact_id)
+	{
+		return $this->client->delete("http://webapi.mymarketing.co.il/api/contacts/" . $contact_id);
+	}
+	public function delete($esp_record)
+	{
+		//delete member
+		$this->deleteMember($esp_record->at_id);
+		return $this->deleteContact($esp_record->at_id);
 	}
 
 	public function getOneElement($correo)
@@ -170,6 +179,4 @@ class ActiveTrail
 			return null;
 		}
 	}
-
-
 }

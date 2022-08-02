@@ -262,6 +262,15 @@ class Mailchimp
             return false;
         }
     }
+    //public function delete($list_id, $subscriber_hash)
+    public function delete($esp_record)
+    {
+        try {
+            return $this->mailchimp->lists->deleteListMemberPermanent($this->list_id, $esp_record->email);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 
     public function deleteListMemberPermanent($list_id, $subscriber_hash)
     {
@@ -272,18 +281,15 @@ class Mailchimp
         }
     }
 
+
+
     public function getOneElement($list_id, $email)
     {
         $lista_elements =  $this->getListMembersInformation($list_id);
-        //$mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-        //$lista_elements = $mailchimp->getListMembersInformation("8100a4643a");
-        //$correo = "hzhm1997@gmail.com"; //hsthenry3244@gmail.com,  //adhel1997@gmail.com
         $indice = 0;
         $object = null;
         $limite = count($lista_elements);
-
         while ($indice < $limite && $lista_elements[$indice]->email_address != $email) {
-
             $indice++;
         }
 

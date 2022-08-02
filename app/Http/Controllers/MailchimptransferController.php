@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Libraries\ActiveTrail;
 use App\Libraries\Keap;
 use App\Libraries\Mailchimp;
+use App\Models\ESP;
+use App\Models\ESPAccount;
 use App\Models\EspsRecords;
 use App\Models\Lead;
 use Exception;
@@ -113,266 +115,143 @@ class MailchimptransferController extends Controller
     }
 
 
-    public function storeMailchimpToActivetrail(Request $request)
+    public function storeTransfer(Request $request)
     {
-        //  return true;
         $request->validate(
             [
                 'origin'  => 'required',
-                //'receives' => 'required',
+                'receives' => 'required',
                 'emails' => 'required',
             ],
             [
                 'origin.required'   => 'You need select origin account  ',
-                //'receives.required'   => 'You need select destinate account  ',
+                'receives.required'   => 'You need select destinate account  ',
                 'emails.required'   => 'You need add email to transfer',
             ]
         );
 
+        $bandera_insert = false;
+
         $origin     = $request->origin;
-        $receives   = $request->receives; //verify names on blade
+        $receives   = $request->receives;
+
         $previus_emails = str_replace("\r", "",  str_replace(" ", "", $request->emails));
         $listEmails   = explode("\n", $previus_emails);
 
-        $apis = "";
-        switch ($origin) {
-            case 'mailchimp' && $receives == 'active_trail':
-                $response = $this->transferMailchimpToActivetrail($listEmails);
-                $apis = " Mailchim to Active Trail";
-                break;
-            case 'active_trail' && $receives == 'mailchimp':
-                $response = $this->transferActiveTrailToMailchimp($listEmails);
-                $apis = " Active Trail to Mailchimp";
-                break;
-            case    'active_trail' && $receives == 'keap':
-                $response = $this->transferActiveTrailToKeap($listEmails);
-                $apis = "Active Trail to  Keap";
-                break;
-            case 'keap' && $receives == 'active_trail':
-                $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
-                $apis = "Keap to Active Trail";
-                break;
-            default:
-                return redirect()->back()->with(['error' => 'Transfer is not valide']);
-                break;
-        }
-        if ($response) {
-            return redirect()->back()->with(['success' => 'Transfer successfull: ' . $apis]);
-        } else {
-            return redirect()->back()->with(['error' => 'Has error on response. Dont transfer']);
-        }
+        $list_ids = ['8100a4643a', '75188', '92'];
 
-        /*
-        if ($origin == 'mailchimp' && $receives == 'active_trail') {
-            $respuesta = $this->transferMailchimpToActivetrail($listEmails);
-            if ($respuesta) {
-                return redirect()->back()->with(['success' => 'Transfer successfull: Mailchimp to Active Trail']);
-            } else {
-                return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
-            }
-        } else if ($origin == 'active_trail' && $receives == 'mailchimp') {
-            $response = $this->transferActiveTrailToMailchimp($listEmails);
-            if ($response) {
-                return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to Mailchimp']);
-            } else {
-                return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
-            }
-        } else if ($origin == 'active_trail' && $receives == 'keap') {
-            $response = $this->transferActiveTrailToKeap($listEmails);
-            if ($response) {
-                return redirect()->back()->with(['success' => 'Transfer successfull: Active Trail to  Keap']);
-            } else {
-                return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
-            }
-        } else if ($origin == 'keap' && $receives == 'active_trail') {
-            $response = $this->transfer_Keap_to_ActiveTrail($listEmails);
-            if ($response) {
-                return redirect()->back()->with(['success' => 'Transfer successfull: Keap to Active Trail']);
-            } else {
-                return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
-            }
-        } else {
-            return redirect()->back()->with(['error' => 'Transfer is not valide']);
-        }
-
-        */
-    }
-
-
-
-    public function transferMailchimpToActivetrail($listEmails)
-    {
-        //$listEmails = ['cdautorio@gmail.com'];
-        $list_id = '8100a4643a';
         $bandera = false;
+        $espAccount_origin = ESPAccount::find($origin);
+        $esp_origin = ESP::find($espAccount_origin->esp_id);
 
-        //$mailchimp = new Mailchimp(['apiKey' => 'e6ce965275b2c237e341f3876d34f802-us12', 'server' => 'us12']);
-        $mailchimp = $this->initMailchimpOrigin();
-        $active_trail = $this->initActiveTrail();
+        $espAccount_receives = ESPAccount::find($receives);
+        $esp_receives = ESP::find($espAccount_receives->esp_id);
 
-        if (!is_null($mailchimp)) {
-            for ($i = 0; $i < count($listEmails); $i++) {
-                //eliminar en mailchimp si encuentra
-                //buscar en mailchimp entrando a la api para hacer la llamada
-                //$objetoMailchimp = $mailchimp->getOneElement($list_id, $listEmails[$i]);
+        $origin_class = $esp_origin->class;
 
-                //verificar si existe en mailchimp with table
-                $object_active_trail = EspsRecords::getActiveTrail('mc_id')->searchEmail($listEmails[$i])->first();
+        $receive_class = $esp_receives->class;
 
-                $response = $active_trail->insertElement($listEmails[$i]);
-                $at_campos = $response->json();
-                if (!empty($at_campos['id'])) {
-                    EspsRecords::create([
-                        'email' => $at_campos['email'], // 
-                        'at_id' => $at_campos['id']
-                    ]);
-                    if (!is_null($object_active_trail)) {
-                        //return $object_active_trail->email;
-                        //$mailchimp->archivateListMember($list_id, $listEmails[$i]);
-                        $mailchimp->archivateListMember($list_id, $object_active_trail->email);
-                        $object_active_trail->delete();
-                        $bandera = true;
-                    }
-                } else $bandera = false; //"no recupera respuesta";
-
-            }
+        $api_origen = EspsRecords::getApiOrigin($origin);
+        if ($api_origen == 'mc_id') {
+            $list_id_origin = $list_ids[0];
+        } else if ($api_origen == 'at_id') {
+            $list_id_origin = $list_ids[1];
+        } else if ($api_origen == 'keap_id') {
+            $list_id_origin = $list_ids[2];
         }
-        return $bandera;
-    }
 
-    public function transferActiveTrailToMailchimp($listEmails)
-    {
-        //        $listEmails = ['cdautorio@gmail.com'];
-        $mail_list_id = '8100a4643a'; //do dinamic since db
-        $bandera = false;
-
-        $active_trail = $this->initActiveTrail();
-        $mailchimp    = $this->initMailchimpOrigin();
-
-        if (!is_null($mailchimp)) {
-            for ($i = 0; $i < count($listEmails); $i++) {
-                //buscar en activetrail
-                //$object_active_trail = $active_trail->getOneElement($listEmails[$i]);
-                $object_active_trail = EspsRecords::getActiveTrail('at_id')->searchEmail($listEmails[$i])->first();
-                //insert on api destinate only if not exist. If existe return false
-                $response = $mailchimp->addListOneMember($mail_list_id, [
-                    "email_address" => $listEmails[$i],
-                    "status"        => "subscribed",
-                ]);
-                if ($response != false &&  !empty($response->unique_email_id)) { //solo si manda true: ok //solo inserta una vez un email, la segunda vez manda false
-                    //print_r($response->unique_email_id);
-
-                    EspsRecords::create([
-                        'email' => $response->email_address, // 
-                        'mc_id' => $response->unique_email_id //1111 change //se agrega solo para darle un valor a mailchimp. Para borrar se ocupa email
-                    ]);
-
-                    if (!is_null($object_active_trail)) {
-                        //eliminar activetrail
-                        $active_trail->deleteMember($object_active_trail['at_id']); //'52069519' o 52063716
-                        $active_trail->deleteContact($object_active_trail['at_id']);
-                        $object_active_trail->delete(); //si eliminar testeado
-                        $bandera = true;
-                    }
-                } else {
-                    $bandera = false; //ya existe un email o no se activo key on mailchimp
-                }
-            }
+        $api_receive = EspsRecords::getApiReceive($receives);
+        if ($api_receive == 'mc_id') {
+            $list_id_receive = $list_ids[0];
+        } else if ($api_receive == 'at_id') {
+            $list_id_receive = $list_ids[1];
+        } else if ($api_receive == 'keap_id') {
+            $list_id_receive = $list_ids[2];
         }
-        return $bandera;
-    }
 
-    public function transferActiveTrailToKeap($listEmails)
-    {
-        //$listEmails = ['hsthenry3244@gmail.com'];
-        //conect api ACTIVE TRAIL 
-        //Search on active trail : if exist 
-        //conect api Keap
-        //insert on Keap : if response successfull :else dont delete nothing insert keap
-        //delete on active trail  
-        $bandera = false;
-        $active_trail = $this->initActiveTrail();
-        $keap = $this->initKeap();
 
-        if (!is_null($keap)) {
-            for ($i = 0; $i < count($listEmails); $i++) {
-                //buscar en activetrail
-                $object_active_trail = EspsRecords::getActiveTrail('at_id')->searchEmail($listEmails[$i])->first();
+        //return $espAccount_origin;
 
-                //insert on keap
-                $lead = Lead::searchLead($listEmails[$i]); //new method on lead
+        $api_origin = new $origin_class([
 
-                if (!is_null($lead)) {
-                    $response = $keap->push($lead); //review
-                    if (!empty($response['id'])) {
-                        // print_r($response->email_addresses[0]['email']);
+            'apiKey' => $espAccount_origin->key,
+            'server' => $espAccount_origin->server,
+            'list_id' => $list_id_origin,
+            'client_id' => $espAccount_origin->client_id,
+            'client_secret' => $espAccount_origin->client_secret,
+            'token' => $espAccount_origin->token,
+            'access_token' => $espAccount_origin->access_token,
+            'refresh_token' => $espAccount_origin->refresh_token,
+            'esp_account_id' => $espAccount_origin->id,
+            'url' => $espAccount_origin->url,
+            'user' => $espAccount_origin->user,
+            'user_token' => $espAccount_origin->user_token
+        ]);
 
-                        //insertar en table bd local
-                        EspsRecords::create([
-                            'email'   => $response->email_addresses[0]['email'], // $response['email'], //??
-                            'keap_id' => $response['id']
-                        ]);
 
-                        if (!is_null($object_active_trail)) {
-                            //eliminar activetrail
-                            $active_trail->deleteMember($object_active_trail['at_id']); //'52069519' o 52063716
-                            $active_trail->deleteContact($object_active_trail['at_id']);
-                            $object_active_trail->delete(); //si eliminar testeado
-                            $bandera = true;
+        $api_receives = new $receive_class([
+            'apiKey' => $espAccount_receives->key,
+            'server' => $espAccount_receives->server,
+            'list_id' => $list_id_receive,
+            'client_id' => $espAccount_receives->client_id,
+            'client_secret' => $espAccount_receives->client_secret,
+            'token' => $espAccount_receives->token,
+            'access_token' => $espAccount_receives->access_token,
+            'refresh_token' => $espAccount_receives->refresh_token,
+            'esp_account_id' => $espAccount_receives->id,
+            'url' => $espAccount_receives->url,
+            'user' => $espAccount_receives->user,
+            'user_token' => $espAccount_receives->user_token
+        ]);
+
+        for ($i = 0; $i < count($listEmails); $i++) {
+            //verificar si existe en mailchimp with table
+            $object_records_origin = EspsRecords::getActiveTrail($api_origen)->searchEmail($listEmails[$i])->first();
+            if (!is_null($object_records_origin)) {
+                //$response = $api_receives->insertElement($listEmails[$i]); //do push all 3 apis
+                $lead = Lead::searchLead($listEmails[$i]);
+                if (!empty($lead)) {
+                    $response = $api_receives->push($lead); //do push all 3 apis
+                    if ($api_receive == 'mc_id') {
+                        if ($response != false &&  !empty($response->unique_email_id)) { //solo si manda true: ok //solo inserta una vez un email, la segunda vez manda false
+                            EspsRecords::create([
+                                'email' => $response->email_address, // 
+                                'mc_id' => $response->unique_email_id, //1111 change //se agrega solo para darle un valor a mailchimp. Para borrar se ocupa email
+                                'list_id' => $response->list_id
+                            ]);
+                            $bandera_insert = true;
                         }
-                    } else {
-                        $bandera = false; //"no se agregó el contacto";
+                    } else if ($api_receive == 'at_id') {
+                        $at_campos = $response->json();
+                        if (!empty($at_campos['id'])) {
+                            EspsRecords::create([
+                                'email' => $at_campos['email'], // 
+                                'at_id' => $at_campos['id']
+                            ]);
+                            $bandera_insert = true;
+                        }
+                    } else if ($api_receive == 'keap_id') {
+                        if (!empty($response['id'])) {
+                            EspsRecords::create([
+                                'email'   => $response->email_addresses[0]['email'], // $response['email'], //??
+                                'keap_id' => $response['id']
+                            ]);
+                            $bandera_insert = true;
+                        }
                     }
-
-                    //recuperar respuesta push si fue exitoso
-                    //insertar en la bd local y continue with delete en active trail
+                    if ($bandera_insert) {
+                        $api_origin->delete($object_records_origin); //do delete all
+                        //$api_origin->archivateListMember($list_id, $object_records_origin->email); //do delete all
+                        $object_records_origin->delete();
+                        return redirect()->back()->with(['success' => 'Subscribed successfull']);
+                    }
+                    //  }  //" else no recupera respuesta";
                 }
             }
         }
-        return $bandera;
-        // $this->getResponse($bandera, " Active Trail to Keap");
+        return redirect()->back()->with(['error' => 'Has error on response. Dont create']);
     }
 
-    public function transfer_Keap_to_ActiveTrail($listEmails)
-    {
-        //$listEmails = ['cdautorio@gmail.com'];
-        //conect api ACTIVE TRAIL 
-        //Search on active trail : if exist 
-        //conect api Keap
-        //insert on Keap : if response successfull :else dont delete nothing insert keap
-        //delete on active trail 
-        $bandera = false;
-        $active_trail = $this->initActiveTrail();
-        $keap = $this->initKeap();
-        if (!empty($keap)) {
-            for ($i = 0; $i < count($listEmails); $i++) {
-                //buscar en activetrail
-                $object_keap = EspsRecords::getActiveTrail('keap_id')->searchEmail($listEmails[$i])->first();
-                $lead = Lead::searchLead($listEmails[$i]); //new method on lead
-                $response = $active_trail->insertElement($listEmails[$i]);
-                $at_campos = $response->json();
-                if (!empty($at_campos['id'])) {
-                    EspsRecords::create([
-                        'email' => $at_campos['email'], // 
-                        'at_id' => $at_campos['id']
-                    ]);
-
-                    if (!is_null($object_keap) && !is_null($lead)) {
-                        //eliminar activetrail
-                        $keap->delete($lead);
-                        $object_keap->delete(); //si eliminar testeado
-                        $bandera = true;
-                    }
-                } else {
-                    $bandera = false; //"no se agregó el contacto";
-                }
-
-                //recuperar respuesta push si fue exitoso
-                //insertar en la bd local y continue with delete en active trail
-            }
-        }
-        return $bandera;
-    }
 
     public function initMailchimpOrigin()
     {
@@ -381,32 +260,6 @@ class MailchimptransferController extends Controller
         if (!empty($response->health_status)) {
             return $mailchimp;
         } else {
-            return null;
-        }
-    }
-
-    public function initActiveTrail()
-    {
-        $active_trail = new ActiveTrail([
-            'token' => '0X203B6AD2BBD3DF03434AE455A95F261A8FA40E0B192209DD2DBD9F3BCAD742A70217E44BB13E00A46A01C7747E03D82C',
-            'list_id' => '75188'
-        ]);
-        return $active_trail;
-    }
-
-    public function initKeap()
-    {
-        try {
-            $infusionsoft = new Keap([
-                // 'esp_account_id' => '', //optional add
-                'client_id'     => '9G5psoBL1cJ6cHvK8ZKYB6NIF1MQ7zAG',
-                'client_secret' => 'Tp60FxwTafCvAhpX',
-                'access_token'  => 'UshxFan21l6cSbn1ZWh9SnTQPwIo',
-                'refresh_token' => 'LjMbY6zfHhI0EteXK0fLnE3uPPCVX5Rv',
-                'list_id'     => 92
-            ]);
-            return $infusionsoft;
-        } catch (Exception $e) {
             return null;
         }
     }

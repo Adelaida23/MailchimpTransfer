@@ -10,7 +10,7 @@ class EspsRecords extends Model
     use HasFactory;
 
     protected $guarded = [];
-    
+
 
 
     public function scopeGetActiveTrail($query, $key)
@@ -18,28 +18,41 @@ class EspsRecords extends Model
         return $query->where($key, '<>', null);
     }
 
-    /*
-public function scopeGetDataForEachApi($query, $key)
-{
-    return $query->where($key, '<>', null);
-}
-*/
     public function scopeSearchEmail($query, $email_search)
     {
         return $query->where('email', $email_search);
     }
 
-    /*
-public static function searchActiveTrail($email_search)
-{
-    $key = 'email';
-    // $key2 = 'at_id';
-    $data = EspsRecords::where($key, $email_search)->first();
-    if (!empty($data->id)) {
-        return $data;
-    }
-    return null;
-}
 
-*/
+    public static function getApiOrigin($origin_id)
+    {
+        $account =  ESPAccount::find($origin_id);
+        if (!empty($account->esp_id)) {
+            if ($account->esp_id == 1)
+                return 'mc_id';
+            if ($account->esp_id == 2)
+                return 'at_id';
+            if ($account->esp_id == 3)
+                return 'keap_id';
+            else return 0;
+        }
+
+        return 0;
+    }
+
+    public static function getApiReceive($receive_id)
+    {
+        $account =  ESPAccount::find($receive_id);
+        if (!empty($account->esp_id)) {
+            if ($account->esp_id == 1)
+                return 'mc_id';
+            if ($account->esp_id == 2)
+                return 'at_id';
+            if ($account->esp_id == 3)
+                return 'keap_id';
+            else return 0;
+        }
+
+        return 0;
+    }
 }
